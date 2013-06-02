@@ -5,8 +5,9 @@
 *.pydevproject
 .project
 .metadata
-#bin/
 tmp/
+bin/*
+!bin/NFCapture.apk
 *.tmp
 *.bak
 *.swp
@@ -47,7 +48,7 @@ local.properties
 [Rr]elease/
 x64/
 build/
-[Bb]in/
+#[Bb]in/
 [Oo]bj/
 
 # MSTest test Results
