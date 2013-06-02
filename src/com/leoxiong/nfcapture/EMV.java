@@ -130,16 +130,7 @@ public class EMV {
 	}
 	
 	Response transceive(byte[] data) throws IOException {
-		if (isoDep == null){
-			Log.w("IsoDep", "Object no properly initialized. IsoDep has not connected.");
-			return null;
-		}
-		try {
-			return new Response(isoDep.transceive(data));
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return new Response(isoDep.transceive(data));
 	}
 	
 	void dispose(){
@@ -256,6 +247,10 @@ public class EMV {
 		
 		Response(byte[] data){
 			this.data = data;
+		}
+		
+		Response(String data){
+			this.data = Util.getBytes(data);
 		}
 		
 		Response getTag(byte tag){
