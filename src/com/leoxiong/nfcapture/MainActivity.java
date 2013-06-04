@@ -1,13 +1,9 @@
 package com.leoxiong.nfcapture;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
@@ -18,9 +14,11 @@ import android.nfc.Tag;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
@@ -68,6 +66,19 @@ public class MainActivity extends Activity {
 	}
 	
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    switch (item.getItemId()) {
+	    case R.id.about:
+	    	final Dialog dialog = new Dialog(this);
+	    	dialog.setTitle("About");
+			dialog.setContentView(R.layout.about_dialog);
+			dialog.show();
+	    default:
+	        return super.onOptionsItemSelected(item);
+	    }
+	}
+	
+	@Override
 	public boolean onMenuOpened(int featureId, Menu menu){
 		mShareActionProvider.setShareIntent(setShareIntent());
 		return true;
@@ -85,7 +96,7 @@ public class MainActivity extends Activity {
 		super.onResume();
 
 		if (!mNfcAdapter.isEnabled()){
-			AlertDialog alertDialog = new AlertDialog.Builder(this)
+			new AlertDialog.Builder(this)
 				.setTitle("Enable Near Field Commuication")
 				.setMessage("NFCapture requires the NFC antenna to be on")
 				.setCancelable(false)
@@ -129,24 +140,20 @@ public class MainActivity extends Activity {
 
 		EMV emv = new EMV((Tag) intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));
 		
-		if (emv.isoDep == null)
-			return;
-		
 		FCI_Template selectPSE = null;
 		FCI_Template selectApplet = null;
 		EMV_Proprietary_Template emvProprietary = null;
+		
 		try {
 			selectPSE = new FCI_Template(emv.SELECT_PSE(EMV.APDU.PSE2));
 			selectApplet = new FCI_Template(emv.SELECT_APPLET(selectPSE.proprietary_Template.issuer_Discretionary_Data.application_Template.aid.getBytes()));
 			emvProprietary = new EMV_Proprietary_Template(emv.READ_RECORD());
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-			print(e.getMessage());
-		}
-		finally{
+			print(e.toString());
 			emv.dispose();
+			return;
 		}
-		
 		
 		//http://saush.files.wordpress.com/2006/09/img1.png
 		print("Select Payment System Environment: " + selectPSE.data.toHex() +
@@ -161,7 +168,6 @@ public class MainActivity extends Activity {
 				"\n\t\t\t\tApplication Label: " + selectPSE.proprietary_Template.issuer_Discretionary_Data.application_Template.apl.toASCII() +
 				"\n\t\t\t\tApplication Priority Indicator: " + selectPSE.proprietary_Template.issuer_Discretionary_Data.application_Template.api.toHex());
 		
-
 		/*
 		 *TODO: GPO if PDOL is null
 		if (pdol == null){
@@ -192,12 +198,14 @@ public class MainActivity extends Activity {
 				"\nTrack 1 Discretionary Data: " + emvProprietary.track1.toHex());
 		
 		mVibratorService.vibrate(100);
+		
+		emv.dispose();
 	}
 	
 	private Intent setShareIntent() {
 		Intent intent = new Intent(Intent.ACTION_SEND);
 		intent.setType("text/plain");
-		intent.putExtra(Intent.EXTRA_TEXT, ((TextView) findViewById(R.id.editTextLog)).getText());
+		intent.putExtra(Intent.EXTRA_TEXT, ((TextView) findViewById(R.id.editTextLog)).getText().toString());
     	return intent;
 	}
 	
