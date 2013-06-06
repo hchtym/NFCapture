@@ -139,6 +139,8 @@ public class MainActivity extends Activity {
 	public void onNewIntent(Intent intent){
 		((TextView) findViewById(R.id.editTextLog)).setText("");
 
+		mVibratorService.vibrate(40);
+
 		EMV emv = new EMV((Tag) intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));
 		
 		FCI_Template selectPSE = null;
@@ -150,11 +152,16 @@ public class MainActivity extends Activity {
 			selectApplet = new FCI_Template(emv.SELECT_APPLET(selectPSE.proprietary_Template.issuer_Discretionary_Data.application_Template.aid.getBytes()));
 			emvProprietary = new EMV_Proprietary_Template(emv.READ_RECORD());
 		} catch (Exception e) {
+			mVibratorService.vibrate(new long[] { 0, 50, 50, 50}, -1);
 			e.printStackTrace();
 			print(e.toString());
 			emv.dispose();
 			return;
 		}
+		
+
+		mVibratorService.vibrate(100);		
+		emv.dispose();
 		
 		//http://saush.files.wordpress.com/2006/09/img1.png
 		print("Select Payment System Environment: " + selectPSE.data.toHex() +
@@ -197,10 +204,6 @@ public class MainActivity extends Activity {
 				"\n\tExpirary Date (YYMM): " + emvProprietary.track2.expirary +
 				"\nCardholder Name: " + emvProprietary.cardholderName +
 				"\nTrack 1 Discretionary Data: " + emvProprietary.track1.toHex());
-		
-		mVibratorService.vibrate(100);
-		
-		emv.dispose();
 	}
 	
 	private Intent setShareIntent() {

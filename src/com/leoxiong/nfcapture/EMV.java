@@ -135,7 +135,8 @@ public class EMV {
 	
 	void dispose(){
 		try {
-			isoDep.close();
+			if (isoDep != null)
+				isoDep.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
