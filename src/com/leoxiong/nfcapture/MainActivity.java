@@ -11,14 +11,15 @@ import android.content.IntentFilter;
 import android.content.IntentFilter.MalformedMimeTypeException;
 import android.nfc.NfcAdapter;
 import android.nfc.Tag;
+import android.nfc.tech.IsoDep;
+import android.nfc.tech.MifareClassic;
+import android.nfc.tech.Ndef;
+import android.nfc.tech.NdefFormatable;
 import android.nfc.tech.NfcA;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
 
@@ -51,7 +52,7 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		mIntentFilters = new IntentFilter[] { intentFilter };
-		mTechLists = new String[][] { new String[] { NfcA.class.getName() } };
+		mTechLists = new String[][] { new String[] { IsoDep.class.getName(), MifareClassic.class.getName(), NfcA.class.getName(), NdefFormatable.class.getName() } };
 	}
 
 	@Override
